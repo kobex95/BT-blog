@@ -1,6 +1,6 @@
 # 安知鱼的博客系统
 
-一个基于 Vue3 + Supabase + EdgeOne 的现代化博客系统，包含前台展示和后台管理功能。
+一个基于 Vue3 的现代化博客系统，包含前台展示和后台管理功能，支持宝塔面板部署。
 
 ## ✨ 特性
 
@@ -33,8 +33,7 @@
 - **状态管理**: Pinia
 - **路由**: Vue Router
 - **构建工具**: Vite
-- **数据库**: 本地 MySQL / Supabase (PostgreSQL)
-- **部署平台**: 宝塔面板 / EdgeOne Pages
+- **部署平台**: 宝塔面板
 
 ## 🚀 快速开始
 
@@ -42,8 +41,6 @@
 
 - Node.js >= 18.18.0
 - pnpm >= 9
-- MySQL 5.7+ 或 8.0+ (本地数据库模式)
-- 或 Supabase 账号 (云数据库模式)
 
 ### 安装
 
@@ -57,62 +54,6 @@ cd anheyu-blog
 # 安装依赖
 pnpm install
 ```
-
-### 配置
-
-#### 方式一：使用本地 MySQL 数据库
-
-1. 复制环境变量模板：
-
-```bash
-cp .env.local.example .env.local
-```
-
-2. 初始化数据库：
-
-```bash
-# 导入数据库结构
-mysql -u root -p < database/schema.sql
-```
-
-3. 编辑 `.env.local`：
-
-```env
-# 数据库配置
-VITE_DB_HOST=localhost
-VITE_DB_PORT=3306
-VITE_DB_USER=root
-VITE_DB_PASSWORD=your_password
-VITE_DB_NAME=anheyu_blog
-
-# 数据库类型
-VITE_DB_TYPE=local
-```
-
-详细配置请参考 [LOCAL_DATABASE.md](./LOCAL_DATABASE.md)
-
-#### 方式二：使用 Supabase 云数据库
-
-1. 复制环境变量模板：
-
-```bash
-cp .env.local.example .env.local
-```
-
-2. 编辑 `.env.local`：
-
-```env
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-VITE_DB_TYPE=supabase
-```
-
-3. 初始化数据库：
-
-1. 登录 [Supabase Dashboard](https://supabase.com/dashboard)
-2. 创建新项目
-3. 在 SQL Editor 中执行 `supabase/init.sql` 文件内容
-4. 创建 `media` 存储桶并设置为 Public
 
 ### 本地开发
 
@@ -135,9 +76,9 @@ pnpm preview
 
 ## 📦 部署
 
-详细的部署指南请参考 [DEPLOYMENT.md](./DEPLOYMENT.md)
+详细的部署指南请参考 [BAOTA_DEPLOYMENT.md](./BAOTA_DEPLOYMENT.md)
 
-### 部署到宝塔面板（推荐）
+### 宝塔面板部署（推荐）
 
 1. 准备一台安装了宝塔面板的 Linux 服务器
 2. 参考 [BAOTA_DEPLOYMENT.md](./BAOTA_DEPLOYMENT.md) 完整部署指南
@@ -159,12 +100,6 @@ pnpm preview
    nginx -s reload
    ```
 
-### 部署到 EdgeOne
-
-1. 配置 EdgeOne 环境变量
-2. 构建项目：`pnpm build`
-3. 通过 EdgeOne Pages 部署或手动上传 `dist` 目录
-
 ## 📁 项目结构
 
 ```
@@ -172,7 +107,6 @@ anheyu-blog/
 ├── public/                 # 静态资源
 ├── src/
 │   ├── api/               # API 接口
-│   │   └── supabase/      # Supabase API 封装
 │   ├── assets/            # 资源文件
 │   ├── components/        # 公共组件
 │   ├── composables/       # 组合式函数
@@ -187,26 +121,17 @@ anheyu-blog/
 │   │   └── system/       # 后台管理
 │   ├── App.vue
 │   └── main.ts
-├── supabase/             # Supabase 配置
-│   └── init.sql          # Supabase 数据库初始化脚本
-├── database/             # 本地数据库配置
-│   └── schema.sql        # MySQL 数据库初始化脚本
 ├── build/                # 构建配置
 ├── types/                # 全局类型定义
-│   ├── supabase.ts       # Supabase 类型定义
-│   └── mysql.ts          # MySQL 类型定义
 ├── index.html
 ├── vite.config.ts
 ├── tsconfig.json
 ├── package.json
-├── DEPLOYMENT.md         # 部署文档
 ├── BAOTA_DEPLOYMENT.md   # 宝塔面板部署文档
-├── LOCAL_DATABASE.md     # 本地数据库部署文档
 ├── nginx.conf            # Nginx 配置示例
 ├── deploy.sh             # 自动部署脚本
 ├── ecosystem.config.js   # PM2 进程管理配置
-├── .env.baota.example    # 宝塔部署环境变量模板
-└── .env.local.example    # 本地开发环境变量模板
+└── .env.baota.example    # 宝塔部署环境变量模板
 ```
 
 ## 🔧 功能模块说明
@@ -268,16 +193,8 @@ export async function getData(params: any) {
 
 ## 🐛 常见问题
 
-### 数据库连接失败
-- 检查 `.env.local` 中的 Supabase 配置是否正确
-- 确认 Supabase 项目状态为 Active
-
-### 图片上传失败
-- 确认 Supabase 中已创建 `media` 存储桶
-- 检查存储桶权限设置
-
-### 更多问题
-请参考 [DEPLOYMENT.md](./DEPLOYMENT.md) 常见问题章节
+### 部署相关问题
+请参考 [BAOTA_DEPLOYMENT.md](./BAOTA_DEPLOYMENT.md) 常见问题章节
 
 ## 🤝 贡献
 
@@ -290,7 +207,6 @@ MIT License
 ## 🙏 致谢
 
 - [Vue.js](https://vuejs.org/)
-- [Supabase](https://supabase.com/)
 - [Element Plus](https://element-plus.org/)
 - [Vite](https://vitejs.dev/)
 - [TailwindCSS](https://tailwindcss.com/)
