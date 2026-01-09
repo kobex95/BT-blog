@@ -196,14 +196,6 @@ export async function getData(params: any) {
 ### 部署相关问题
 请参考 [BAOTA_DEPLOYMENT.md](./BAOTA_DEPLOYMENT.md) 常见问题章节
 
-## 🤝 贡献
-
-欢迎提交 Issue 和 Pull Request！
-
-## 📄 许可证
-
-MIT License
-
 ## 🙏 致谢
 
 - [Vue.js](https://vuejs.org/)
