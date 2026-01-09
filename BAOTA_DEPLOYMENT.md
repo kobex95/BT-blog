@@ -9,12 +9,13 @@
 - 宝塔面板（Linux 服务器）
 - Node.js >= 18.18.0（建议使用 20.x）
 - Nginx（宝塔自带）
+- MySQL 5.7+ 或 8.0+（用于数据库）
 - pm2 进程管理器（用于生产环境）
 
 ### 所需账号
 
-- Supabase 账号（用于数据库和存储）
 - 服务器访问权限
+- MySQL 数据库管理员权限
 
 ## 🚀 部署步骤
 
@@ -69,11 +70,44 @@ npm install -g pm2
    pnpm install
    ```
 
-### 第四步：配置环境变量
+### 第四步：配置 MySQL 数据库
+
+1. 在宝塔面板中创建数据库：
+   - 进入「数据库」
+   - 点击「添加数据库」
+   - 数据库名：`anheyu_blog`
+   - 用户名：自动生成
+   - 密码：记住密码
+   - 点击「提交」
+
+2. 导入数据库结构（可选）：
+   - 点击数据库后的「管理」或「导入」
+   - 选择数据库初始化脚本（如果有）
+   - 点击「导入」
+
+或者通过命令行操作：
+
+```bash
+# 登录 MySQL
+mysql -u root -p
+
+# 创建数据库
+CREATE DATABASE anheyu_blog CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+# 创建用户并授权
+CREATE USER 'anheyu'@'localhost' IDENTIFIED BY 'your_strong_password';
+GRANT ALL PRIVILEGES ON anheyu_blog.* TO 'anheyu'@'localhost';
+FLUSH PRIVILEGES;
+
+# 退出
+EXIT;
+```
+
+### 第五步：配置环境变量
 
 1. 复制环境变量模板：
    ```bash
-   cp .env.example .env.production
+   cp .env.baota.example .env.production
    ```
 
 2. 编辑 `.env.production` 文件：
@@ -83,14 +117,17 @@ npm install -g pm2
 
 3. 填写以下配置：
    ```env
-   # Supabase 配置
-   VITE_SUPABASE_URL=https://your-project.supabase.co
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   # MySQL 数据库配置
+   VITE_DB_HOST=localhost
+   VITE_DB_PORT=3306
+   VITE_DB_USER=anheyu
+   VITE_DB_PASSWORD=your_strong_password
+   VITE_DB_NAME=anheyu_blog
 
    # 应用配置
    VITE_APP_TITLE=安知鱼的博客
    VITE_APP_DESCRIPTION=一个分享技术与生活的博客
-   VITE_API_URL=https://your-project.supabase.co
+   VITE_API_URL=http://localhost:8848/api
 
    # 部署配置 - 重要！
    VITE_PUBLIC_PATH=/          # 如果部署在根目录使用 /，子目录使用 /your-path/
@@ -102,16 +139,9 @@ npm install -g pm2
    VITE_COMPRESSION=all
    ```
 
-### 第五步：构建项目
+### 第六步：构建项目
 
-```bash
-# 构建生产版本
-pnpm build
-```
-
-构建完成后，会在项目根目录生成 `dist` 文件夹。
-
-### 第六步：配置 Nginx
+### 第七步：配置 Nginx
 
 #### 方法一：使用宝塔面板配置
 
@@ -176,23 +206,12 @@ nginx -t  # 测试配置
 nginx -s reload  # 重载配置
 ```
 
-### 第七步：配置 HTTPS（推荐）
+### 第八步：配置 HTTPS（推荐）
 
 1. 在宝塔面板网站设置中点击「SSL」
 2. 选择「Let's Encrypt」免费证书
 3. 填写邮箱和域名，点击「申请」
 4. 开启「强制 HTTPS」
-
-### 第八步：Supabase 配置
-
-1. 登录 [Supabase Dashboard](https://supabase.com/dashboard)
-2. 创建新项目
-3. 在 SQL Editor 中执行 `supabase/init.sql` 文件内容
-4. 创建 `media` 存储桶并设置为 Public：
-   - 进入 Storage → New bucket
-   - Bucket 名称：`media`
-   - Public bucket：勾选
-5. 配置 RLS（Row Level Security）策略
 
 ### 第九步：测试部署
 
@@ -274,9 +293,14 @@ chmod +x deploy.sh
 
 1. 进入「计划任务」
 2. 添加任务：
-   - 任务类型：备份数据库（如果有本地数据库）
+   - 任务类型：备份数据库
+   - 数据库选择：`anheyu_blog`
    - 执行周期：每天
    - 保留份数：7 份
+
+3. 备份到云存储（可选）：
+   - 配置宝塔云存储（如阿里云OSS、腾讯云COS）
+   - 设置自动上传
 
 ## 📊 监控和维护
 
@@ -350,12 +374,23 @@ location / {
 
 ### 3. 图片上传失败
 
-**原因**：Supabase 存储桶未配置或权限不足
+**原因**：
+- 上传目录权限不足
+- 文件大小超过限制
+- 磁盘空间不足
 
 **解决**：
-- 确认 Supabase 中已创建 `media` 存储桶
-- 检查存储桶是否设置为 Public
-- 检查 RLS 策略配置
+```bash
+# 创建上传目录
+mkdir -p /www/wwwroot/anheyu/dist/uploads
+
+# 设置权限
+chmod 755 /www/wwwroot/anheyu/dist/uploads
+chown -R www:www /www/wwwroot/anheyu/dist
+
+# 检查磁盘空间
+df -h
+```
 
 ### 4. 页面样式错乱
 
@@ -370,11 +405,30 @@ pnpm build
 
 ### 5. 数据库连接失败
 
-**原因**：Supabase 配置错误
+**原因**：
+- MySQL 配置错误
+- 数据库服务未启动
+- 权限不足
 
 **解决**：
-- 检查 `.env.production` 中的 Supabase URL 和 Key
-- 确认 Supabase 项目状态为 Active
+```bash
+# 检查 MySQL 服务状态
+systemctl status mysql
+
+# 启动 MySQL
+systemctl start mysql
+
+# 测试数据库连接
+mysql -u anheyu -p anheyu_blog
+
+# 检查防火墙
+systemctl status firewalld
+# 如果需要，开放 3306 端口
+firewall-cmd --add-port=3306/tcp --permanent
+firewall-cmd --reload
+```
+
+同时检查 `.env.production` 中的数据库配置是否正确。
 
 ### 6. 内存不足导致构建失败
 
@@ -411,7 +465,7 @@ pnpm build
 
 - [宝塔面板官方文档](https://www.bt.cn/bbs/)
 - [Vite 部署文档](https://cn.vitejs.dev/guide/build.html)
-- [Supabase 官方文档](https://supabase.com/docs)
+- [MySQL 官方文档](https://dev.mysql.com/doc/)
 - [Nginx 配置指南](https://nginx.org/en/docs/)
 
 ## 🆘 获取帮助
