@@ -34,10 +34,7 @@
 curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 apt-get install -y nodejs
 
-# 安装 pnpm
-npm install -g pnpm
-
-# 安装 pm2
+# 安装 pm2（可选，用于进程管理）
 npm install -g pm2
 ```
 
@@ -54,21 +51,32 @@ npm install -g pm2
 
 ### 第三步：安装项目依赖
 
+**重要**：项目已移除 pnpm 限制，现在支持使用 npm 安装依赖。
+
 1. 进入项目目录：
    ```bash
    cd /www/wwwroot/anheyu
    ```
 
-2. 安装依赖：
+2. **使用 npm 安装依赖**（推荐，宝塔面板原生支持）：
    ```bash
-   pnpm install
+   npm install
    ```
 
 3. 如果遇到网络问题，使用国内镜像：
    ```bash
-   pnpm config set registry https://registry.npmmirror.com
-   pnpm install
+   npm config set registry https://registry.npmmirror.com
+   npm install
    ```
+
+**可选**：如果希望使用 pnpm 以获得更好的性能：
+```bash
+# 安装 pnpm
+npm install -g pnpm
+
+# 使用 pnpm 安装依赖
+pnpm install
+```
 
 ### 第四步：配置 MySQL 数据库
 
@@ -140,6 +148,13 @@ EXIT;
    ```
 
 ### 第六步：构建项目
+
+使用 npm 构建项目：
+```bash
+npm run build
+```
+
+构建完成后，生成的静态文件将在 `dist` 目录中。
 
 ### 第七步：配置 Nginx
 
@@ -270,10 +285,10 @@ echo "开始部署..."
 git pull origin main
 
 # 安装依赖
-pnpm install
+npm install
 
 # 构建项目
-pnpm build
+npm run build
 
 # 重启 Nginx
 nginx -s reload
@@ -342,7 +357,7 @@ apt update && apt upgrade -y
 
 # 更新 Node.js 依赖
 cd /www/wwwroot/anheyu
-pnpm update
+npm update
 ```
 
 ### 3. 文件权限设置
@@ -399,7 +414,7 @@ df -h
 **解决**：
 ```bash
 # 重新构建
-pnpm build
+npm run build
 # 清除浏览器缓存后重试
 ```
 
@@ -436,7 +451,7 @@ firewall-cmd --reload
 ```bash
 # 增加内存限制
 export NODE_OPTIONS="--max-old-space-size=8192"
-pnpm build
+npm run build
 ```
 
 ## 🔄 更新部署流程
@@ -452,10 +467,10 @@ cd /www/wwwroot/anheyu
 git pull origin main
 
 # 3. 更新依赖（如果需要）
-pnpm install
+npm install
 
 # 4. 重新构建
-pnpm build
+npm run build
 
 # 5. 如果新版本有问题，可以快速回滚
 # cp -r /www/wwwroot/anheyu/dist_backup/* /www/wwwroot/anheyu/dist/
