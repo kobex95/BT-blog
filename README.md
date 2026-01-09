@@ -34,7 +34,7 @@
 - **路由**: Vue Router
 - **构建工具**: Vite
 - **数据库**: Supabase (PostgreSQL)
-- **部署平台**: EdgeOne Pages
+- **部署平台**: 宝塔面板 / EdgeOne Pages
 
 ## 🚀 快速开始
 
@@ -108,6 +108,28 @@ pnpm preview
 
 详细的部署指南请参考 [DEPLOYMENT.md](./DEPLOYMENT.md)
 
+### 部署到宝塔面板（推荐）
+
+1. 准备一台安装了宝塔面板的 Linux 服务器
+2. 参考 [BAOTA_DEPLOYMENT.md](./BAOTA_DEPLOYMENT.md) 完整部署指南
+3. 快速开始：
+   ```bash
+   # 上传项目到 /www/wwwroot/anheyu
+   # 安装依赖
+   pnpm install
+
+   # 配置环境变量
+   cp .env.baota.example .env.production
+   # 编辑 .env.production 填写配置
+
+   # 构建项目
+   pnpm build
+
+   # 配置 Nginx（参考 nginx.conf）
+   # 重启 Nginx
+   nginx -s reload
+   ```
+
 ### 部署到 EdgeOne
 
 1. 配置 EdgeOne 环境变量
@@ -144,7 +166,12 @@ anheyu-blog/
 ├── vite.config.ts
 ├── tsconfig.json
 ├── package.json
-└── DEPLOYMENT.md         # 部署文档
+├── DEPLOYMENT.md         # 部署文档
+├── BAOTA_DEPLOYMENT.md   # 宝塔面板部署文档
+├── nginx.conf            # Nginx 配置示例
+├── deploy.sh             # 自动部署脚本
+├── ecosystem.config.js   # PM2 进程管理配置
+└── .env.baota.example    # 宝塔部署环境变量模板
 ```
 
 ## 🔧 功能模块说明
