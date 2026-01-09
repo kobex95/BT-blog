@@ -33,7 +33,7 @@
 - **状态管理**: Pinia
 - **路由**: Vue Router
 - **构建工具**: Vite
-- **数据库**: Supabase (PostgreSQL)
+- **数据库**: 本地 MySQL / Supabase (PostgreSQL)
 - **部署平台**: 宝塔面板 / EdgeOne Pages
 
 ## 🚀 快速开始
@@ -42,6 +42,8 @@
 
 - Node.js >= 18.18.0
 - pnpm >= 9
+- MySQL 5.7+ 或 8.0+ (本地数据库模式)
+- 或 Supabase 账号 (云数据库模式)
 
 ### 安装
 
@@ -54,31 +56,58 @@ cd anheyu-blog
 
 # 安装依赖
 pnpm install
-
-# 安装 Supabase 客户端
-pnpm add @supabase/supabase-js
 ```
 
 ### 配置
 
+#### 方式一：使用本地 MySQL 数据库
+
 1. 复制环境变量模板：
 
 ```bash
-cp .env.example .env.local
+cp .env.local.example .env.local
 ```
 
-2. 编辑 `.env.local`，填写 Supabase 配置：
+2. 初始化数据库：
+
+```bash
+# 导入数据库结构
+mysql -u root -p < database/schema.sql
+```
+
+3. 编辑 `.env.local`：
+
+```env
+# 数据库配置
+VITE_DB_HOST=localhost
+VITE_DB_PORT=3306
+VITE_DB_USER=root
+VITE_DB_PASSWORD=your_password
+VITE_DB_NAME=anheyu_blog
+
+# 数据库类型
+VITE_DB_TYPE=local
+```
+
+详细配置请参考 [LOCAL_DATABASE.md](./LOCAL_DATABASE.md)
+
+#### 方式二：使用 Supabase 云数据库
+
+1. 复制环境变量模板：
+
+```bash
+cp .env.local.example .env.local
+```
+
+2. 编辑 `.env.local`：
 
 ```env
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-VITE_APP_TITLE=安知鱼的博客
-VITE_APP_DESCRIPTION=一个分享技术与生活的博客
-VITE_API_URL=https://your-project.supabase.co
-VITE_ROUTER_HISTORY=hash
+VITE_DB_TYPE=supabase
 ```
 
-### 数据库初始化
+3. 初始化数据库：
 
 1. 登录 [Supabase Dashboard](https://supabase.com/dashboard)
 2. 创建新项目
@@ -159,19 +188,25 @@ anheyu-blog/
 │   ├── App.vue
 │   └── main.ts
 ├── supabase/             # Supabase 配置
-│   └── init.sql          # 数据库初始化脚本
+│   └── init.sql          # Supabase 数据库初始化脚本
+├── database/             # 本地数据库配置
+│   └── schema.sql        # MySQL 数据库初始化脚本
 ├── build/                # 构建配置
 ├── types/                # 全局类型定义
+│   ├── supabase.ts       # Supabase 类型定义
+│   └── mysql.ts          # MySQL 类型定义
 ├── index.html
 ├── vite.config.ts
 ├── tsconfig.json
 ├── package.json
 ├── DEPLOYMENT.md         # 部署文档
 ├── BAOTA_DEPLOYMENT.md   # 宝塔面板部署文档
+├── LOCAL_DATABASE.md     # 本地数据库部署文档
 ├── nginx.conf            # Nginx 配置示例
 ├── deploy.sh             # 自动部署脚本
 ├── ecosystem.config.js   # PM2 进程管理配置
-└── .env.baota.example    # 宝塔部署环境变量模板
+├── .env.baota.example    # 宝塔部署环境变量模板
+└── .env.local.example    # 本地开发环境变量模板
 ```
 
 ## 🔧 功能模块说明
